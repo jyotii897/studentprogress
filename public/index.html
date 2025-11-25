@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Progress Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Student Check-In</h1>
+            <p>Track your progress and stay on target.</p>
+        </header>
+        
+        <main>
+            <form id="checkInForm">
+                <div class="form-group">
+                    <label for="student_id">Student ID</label>
+                    <select id="student_id" name="student_id" required>
+                        <option value="student_123">Alice (student_123)</option>
+                        <option value="student_456">Bob (student_456)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="quiz_score">Quiz Score (0-10)</label>
+                    <input type="number" id="quiz_score" name="quiz_score" min="0" max="10" required placeholder="e.g., 8">
+                </div>
+
+                <div class="form-group">
+                    <label for="focus_minutes">Focus Minutes</label>
+                    <input type="number" id="focus_minutes" name="focus_minutes" min="0" required placeholder="e.g., 120">
+                </div>
+
+                <button type="submit" id="submitBtn">Submit Check-In</button>
+            </form>
+
+            <div id="statusMessage" class="status-card hidden">
+                <div class="status-icon"></div>
+                <h3 id="statusTitle"></h3>
+                <p id="statusText"></p>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

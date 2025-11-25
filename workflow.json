@@ -1,0 +1,154 @@
+{
+    "name": "Student Intervention Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "intervention",
+                "options": {}
+            },
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "id": "1"
+        },
+        {
+            "parameters": {
+                "channel": "mentors",
+                "text": "=Student {{ $json.name }} needs intervention.\nScore: {{ $json.quiz_score }}\nFocus: {{ $json.focus_minutes }} min.\n\n<http://localhost:5678/webhook/approve?student_id={{ $json.student_id }}|Click here to Approve Remedial Task>",
+                "otherOptions": {}
+            },
+            "name": "Slack Notification",
+            "type": "n8n-nodes-base.slack",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ],
+            "id": "2",
+            "credentials": {
+                "slackApi": {
+                    "id": "YOUR_CREDENTIAL_ID",
+                    "name": "Slack account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 12,
+                "unit": "hours"
+            },
+            "name": "Wait for Approval",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ],
+            "id": "3",
+            "webhookId": "approve"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://localhost:3000/assign-intervention",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "student_id",
+                            "value": "={{ $json.student_id }}"
+                        },
+                        {
+                            "name": "task",
+                            "value": "Read Chapter 4"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Assign Task",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                850,
+                200
+            ],
+            "id": "4"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://localhost:3000/auto-unlock",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "student_id",
+                            "value": "={{ $json.student_id }}"
+                        },
+                        {
+                            "name": "reason",
+                            "value": "Mentor timeout (12h)"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Auto Unlock (Timeout)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                850,
+                400
+            ],
+            "id": "5"
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Slack Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Slack Notification": {
+            "main": [
+                [
+                    {
+                        "node": "Wait for Approval",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait for Approval": {
+            "main": [
+                [
+                    {
+                        "node": "Assign Task",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Auto Unlock (Timeout)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
